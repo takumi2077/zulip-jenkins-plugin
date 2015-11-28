@@ -10,6 +10,7 @@ import hudson.tasks.BuildStepMonitor;
 import hudson.tasks.Notifier;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.kohsuke.stapler.DataBoundConstructor;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -19,6 +20,7 @@ public class HumbugNotifier extends Notifier {
 
     private Humbug humbug;
     private String stream;
+    private String title;
     private String hudsonUrl;
     private boolean smartNotify;
 
@@ -32,9 +34,15 @@ public class HumbugNotifier extends Notifier {
         initialize();
     }
 
+    @DataBoundConstructor
+    public HumbugNotifier(String humbugStreamForProject, String humbugTitleForProject) {
+        super();
+        initialize(humbugStreamForProject, humbugTitleForProject);
+    }
+
     public HumbugNotifier(String url, String email, String apiKey, String stream, String hudsonUrl, boolean smartNotify) {
         super();
-        initialize(url, email, apiKey, stream, hudsonUrl, smartNotify);
+        initialize(url, email, apiKey, stream, "", hudsonUrl, smartNotify);
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -92,16 +100,33 @@ public class HumbugNotifier extends Notifier {
             message += "\n\n";
             message += changeString;
         }
-        humbug.sendStreamMessage(stream, build.getProject().getName(), message);
+
+        if(title == "") {
+            title = build.getProject().getName();
+        }
+
+        humbug.sendStreamMessage(stream, title, message);
     }
 
     private void initialize()  {
-        initialize(DESCRIPTOR.getUrl(), DESCRIPTOR.getEmail(), DESCRIPTOR.getApiKey(), DESCRIPTOR.getStream(), DESCRIPTOR.getHudsonUrl(), DESCRIPTOR.getSmartNotify());
+	String s = ("" == DESCRIPTOR.getStreamForProject())? DESCRIPTOR.getStream() : DESCRIPTOR.getStreamForProject();
+	String t = ("" == DESCRIPTOR.getTitleForProject())? "" : DESCRIPTOR.getTitleForProject();
+
+        initialize(DESCRIPTOR.getUrl(), DESCRIPTOR.getEmail(), DESCRIPTOR.getApiKey(), s, t, DESCRIPTOR.getHudsonUrl(), DESCRIPTOR.getSmartNotify());
     }
 
-    private void initialize(String url, String email, String apiKey, String streamName, String hudsonUrl, boolean smartNotify) {
+    private void initialize(String streamName, String title)  {
+        if(streamName == ""){
+            streamName = DESCRIPTOR.getStream();
+        }
+
+        initialize(DESCRIPTOR.getUrl(), DESCRIPTOR.getEmail(), DESCRIPTOR.getApiKey(), streamName, title, DESCRIPTOR.getHudsonUrl(), DESCRIPTOR.getSmartNotify());
+    }
+
+    private void initialize(String url, String email, String apiKey, String streamName, String title, String hudsonUrl, boolean smartNotify) {
         humbug = new Humbug(url, email, apiKey);
         this.stream = streamName;
+        this.title = title;
         if (hudsonUrl.length() > 0 && !hudsonUrl.endsWith("/") ) {
             hudsonUrl = hudsonUrl + "/";
         }
@@ -129,5 +154,13 @@ public class HumbugNotifier extends Notifier {
             publish(build);
         }
         return true;
+    }
+
+    public String getHumbugStreamForProject() {
+        return stream;
+    }
+
+    public String getHumbugTitleForProject() {
+       return title;
     }
 }
