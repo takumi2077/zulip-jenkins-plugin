@@ -1,6 +1,10 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
-  <!--
-    This jelly script is used for per-project configuration.
-    See global.jelly for a general discussion about jelly script.
-  -->
+  <f:advanced>
+    <f:entry title="Stream">
+      <f:textbox name="humbugStreamForProject" value="${descriptor.getStreamForProject()}" />
+    </f:entry>
+    <f:entry title="Title">
+      <f:textbox name="humbugTitleForProject" value="${descriptor.getTitleForProject()}" />
+    </f:entry>
+  </f:advanced>
 </j:jelly>
