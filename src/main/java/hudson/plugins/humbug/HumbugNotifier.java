@@ -4,6 +4,7 @@ import hudson.Extension;
 import hudson.Launcher;
 import hudson.model.AbstractBuild;
 import hudson.model.BuildListener;
+import hudson.EnvVars;
 import hudson.model.Result;
 import hudson.scm.ChangeLogSet;
 import hudson.tasks.BuildStepMonitor;
@@ -49,7 +50,7 @@ public class HumbugNotifier extends Notifier {
         return BuildStepMonitor.BUILD;
     }
 
-    private void publish(AbstractBuild<?, ?> build) throws IOException {
+    private void publish(AbstractBuild<?, ?> build, BuildListener listener) throws IOException, InterruptedException {
         // We call this every time in case our settings have changed
         // between the last time this was run and now.
         initialize();
@@ -105,7 +106,11 @@ public class HumbugNotifier extends Notifier {
             title = build.getProject().getName();
         }
 
-        humbug.sendStreamMessage(stream, title, message);
+        final EnvVars env = build.getEnvironment(listener);
+        final String expandedStream = env.expand(stream);
+        final String expandedTitle = env.expand(title);
+
+        humbug.sendStreamMessage(expandedStream, expandedTitle, message);
     }
 
     private void initialize()  {
@@ -148,10 +153,10 @@ public class HumbugNotifier extends Notifier {
                 build.getResult() != Result.SUCCESS ||
                 previousBuild.getResult() != Result.SUCCESS)
             {
-                publish(build);
+                publish(build, listener);
             }
         } else {
-            publish(build);
+            publish(build, listener);
         }
         return true;
     }
