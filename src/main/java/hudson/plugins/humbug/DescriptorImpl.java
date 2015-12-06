@@ -17,6 +17,7 @@ public class DescriptorImpl extends BuildStepDescriptor<Publisher> {
     private String stream;
     private String streamForProject;
     private String titleForProject;
+    private String messageForProject;
     private String hudsonUrl;
     private boolean smartNotify;
     private static final Logger LOGGER = Logger.getLogger(DescriptorImpl.class.getName());
@@ -54,6 +55,10 @@ public class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         return titleForProject;
     }
 
+    public String getMessageForProject() {
+        return messageForProject;
+    }
+
     public String getHudsonUrl() {
         return hudsonUrl;
     }
@@ -73,7 +78,8 @@ public class DescriptorImpl extends BuildStepDescriptor<Publisher> {
     public Publisher newInstance(StaplerRequest req, JSONObject formData) throws FormException {
         streamForProject = req.getParameter("humbugStreamForProject");
         titleForProject = req.getParameter("humbugTitleForProject");
-        save();
+        messageForProject = req.getParameter("humbugMessageForProject");
+	save();
         try {
             return new HumbugNotifier();
         } catch (Exception e) {
@@ -91,6 +97,9 @@ public class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         stream = req.getParameter("humbugStream");
         hudsonUrl = req.getParameter("humbugHudsonUrl");
         smartNotify = req.getParameter("humbugSmartNotify") != null;
+        streamForProject = req.getParameter("humbugStreamForProject");
+        titleForProject = req.getParameter("humbugTitleForProject");
+        messageForProject = req.getParameter("humbugMessageForProject");
         try {
             new HumbugNotifier();
         } catch (Exception e) {

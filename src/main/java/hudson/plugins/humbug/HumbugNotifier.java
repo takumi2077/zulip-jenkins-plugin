@@ -22,6 +22,7 @@ public class HumbugNotifier extends Notifier {
     private Humbug humbug;
     private String stream;
     private String title;
+    private String message;
     private String hudsonUrl;
     private boolean smartNotify;
 
@@ -36,14 +37,14 @@ public class HumbugNotifier extends Notifier {
     }
 
     @DataBoundConstructor
-    public HumbugNotifier(String humbugStreamForProject, String humbugTitleForProject) {
+    public HumbugNotifier(String humbugStreamForProject, String humbugTitleForProject, String humbugMessageForProject) {
         super();
-        initialize(humbugStreamForProject, humbugTitleForProject);
+        initialize(humbugStreamForProject, humbugTitleForProject, humbugMessageForProject);
     }
 
     public HumbugNotifier(String url, String email, String apiKey, String stream, String hudsonUrl, boolean smartNotify) {
         super();
-        initialize(url, email, apiKey, stream, "", hudsonUrl, smartNotify);
+        initialize(url, email, apiKey, stream, "", "", hudsonUrl, smartNotify);
     }
 
     public BuildStepMonitor getRequiredMonitorService() {
@@ -81,6 +82,7 @@ public class HumbugNotifier extends Notifier {
         }
         String resultString = result.toString();
         String message = "Build " + build.getDisplayName();
+
         if (hudsonUrl != null && hudsonUrl.length() > 1) {
             message = "[" + message + "](" + hudsonUrl + build.getUrl() + ")";
         }
@@ -102,11 +104,17 @@ public class HumbugNotifier extends Notifier {
             message += changeString;
         }
 
+        final EnvVars env = build.getEnvironment(listener);
+
+        if(this.message != "") {
+            message += "\n\n";
+            message += env.expand(this.message);
+        }
+
         if(title == "") {
             title = build.getProject().getName();
         }
 
-        final EnvVars env = build.getEnvironment(listener);
         final String expandedStream = env.expand(stream);
         final String expandedTitle = env.expand(title);
 
@@ -117,21 +125,22 @@ public class HumbugNotifier extends Notifier {
 	String s = ("" == DESCRIPTOR.getStreamForProject())? DESCRIPTOR.getStream() : DESCRIPTOR.getStreamForProject();
 	String t = ("" == DESCRIPTOR.getTitleForProject())? "" : DESCRIPTOR.getTitleForProject();
 
-        initialize(DESCRIPTOR.getUrl(), DESCRIPTOR.getEmail(), DESCRIPTOR.getApiKey(), s, t, DESCRIPTOR.getHudsonUrl(), DESCRIPTOR.getSmartNotify());
+        initialize(DESCRIPTOR.getUrl(), DESCRIPTOR.getEmail(), DESCRIPTOR.getApiKey(), s, t, "", DESCRIPTOR.getHudsonUrl(), DESCRIPTOR.getSmartNotify());
     }
 
-    private void initialize(String streamName, String title)  {
+    private void initialize(String streamName, String title, String message)  {
         if(streamName == ""){
             streamName = DESCRIPTOR.getStream();
         }
 
-        initialize(DESCRIPTOR.getUrl(), DESCRIPTOR.getEmail(), DESCRIPTOR.getApiKey(), streamName, title, DESCRIPTOR.getHudsonUrl(), DESCRIPTOR.getSmartNotify());
+        initialize(DESCRIPTOR.getUrl(), DESCRIPTOR.getEmail(), DESCRIPTOR.getApiKey(), streamName, title, message, DESCRIPTOR.getHudsonUrl(), DESCRIPTOR.getSmartNotify());
     }
 
-    private void initialize(String url, String email, String apiKey, String streamName, String title, String hudsonUrl, boolean smartNotify) {
+    private void initialize(String url, String email, String apiKey, String streamName, String title, String message, String hudsonUrl, boolean smartNotify) {
         humbug = new Humbug(url, email, apiKey);
         this.stream = streamName;
         this.title = title;
+        this.message = message;
         if (hudsonUrl.length() > 0 && !hudsonUrl.endsWith("/") ) {
             hudsonUrl = hudsonUrl + "/";
         }
@@ -167,5 +176,9 @@ public class HumbugNotifier extends Notifier {
 
     public String getHumbugTitleForProject() {
        return title;
+    }
+
+    public String getHumbugMessageForProject() {
+       return message;
     }
 }
