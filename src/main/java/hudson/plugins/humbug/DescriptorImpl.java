@@ -79,9 +79,9 @@ public class DescriptorImpl extends BuildStepDescriptor<Publisher> {
         streamForProject = req.getParameter("humbugStreamForProject");
         titleForProject = req.getParameter("humbugTitleForProject");
         messageForProject = req.getParameter("humbugMessageForProject");
-	save();
+
         try {
-            return new HumbugNotifier();
+            return new HumbugNotifier(streamForProject, titleForProject, messageForProject);
         } catch (Exception e) {
             String message = "Failed to initialize zulip notifier - check your zulip notifier configuration settings: " + e.getMessage();
             LOGGER.log(Level.WARNING, message, e);

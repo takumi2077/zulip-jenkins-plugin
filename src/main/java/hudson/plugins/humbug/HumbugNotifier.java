@@ -81,34 +81,34 @@ public class HumbugNotifier extends Notifier {
             changeString += "\nError determining changes since last build - please contact support@zulip.com.";
         }
         String resultString = result.toString();
-        String message = "Build " + build.getDisplayName();
+        String messageString = "Build " + build.getDisplayName();
 
         if (hudsonUrl != null && hudsonUrl.length() > 1) {
-            message = "[" + message + "](" + hudsonUrl + build.getUrl() + ")";
+            messageString = "[" + messageString + "](" + hudsonUrl + build.getUrl() + ")";
         }
-        message += ": ";
+        messageString += ": ";
         if (!smartNotify && result == Result.SUCCESS) {
             // SmartNotify is off, so a success is actually the common
             // case here; so don't yell about it.
-            message += StringUtils.capitalize(resultString.toLowerCase());
+            messageString += StringUtils.capitalize(resultString.toLowerCase());
         } else {
-            message += "**" + resultString + "**";
+            messageString += "**" + resultString + "**";
             if (result == Result.SUCCESS) {
-                message += " :white_check_mark:";
+                messageString += " :white_check_mark:";
             } else {
-                message += " :x:";
+                messageString += " :x:";
             }
         }
         if (changeString.length() > 0 ) {
-            message += "\n\n";
-            message += changeString;
+            messageString += "\n\n";
+            messageString += changeString;
         }
 
         final EnvVars env = build.getEnvironment(listener);
 
         if(this.message != "") {
-            message += "\n\n";
-            message += env.expand(this.message);
+            messageString += "\n\n";
+            messageString += env.expand(this.message);
         }
 
         if(title == "") {
@@ -118,14 +118,11 @@ public class HumbugNotifier extends Notifier {
         final String expandedStream = env.expand(stream);
         final String expandedTitle = env.expand(title);
 
-        humbug.sendStreamMessage(expandedStream, expandedTitle, message);
+        humbug.sendStreamMessage(expandedStream, expandedTitle, messageString);
     }
 
     private void initialize()  {
-	String s = ("" == DESCRIPTOR.getStreamForProject())? DESCRIPTOR.getStream() : DESCRIPTOR.getStreamForProject();
-	String t = ("" == DESCRIPTOR.getTitleForProject())? "" : DESCRIPTOR.getTitleForProject();
-
-        initialize(DESCRIPTOR.getUrl(), DESCRIPTOR.getEmail(), DESCRIPTOR.getApiKey(), s, t, "", DESCRIPTOR.getHudsonUrl(), DESCRIPTOR.getSmartNotify());
+        initialize(DESCRIPTOR.getUrl(), DESCRIPTOR.getEmail(), DESCRIPTOR.getApiKey(), "", "", "", DESCRIPTOR.getHudsonUrl(), DESCRIPTOR.getSmartNotify());
     }
 
     private void initialize(String streamName, String title, String message)  {
@@ -170,15 +167,15 @@ public class HumbugNotifier extends Notifier {
         return true;
     }
 
-    public String getHumbugStreamForProject() {
+    public String getStreamForProject() {
         return stream;
     }
 
-    public String getHumbugTitleForProject() {
+    public String getTitleForProject() {
        return title;
     }
 
-    public String getHumbugMessageForProject() {
+    public String getMessageForProject() {
        return message;
     }
 }

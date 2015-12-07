@@ -1,13 +1,13 @@
 <j:jelly xmlns:j="jelly:core" xmlns:st="jelly:stapler" xmlns:d="jelly:define" xmlns:l="/lib/layout" xmlns:t="/lib/hudson" xmlns:f="/lib/form">
   <f:advanced>
-    <f:entry title="Stream" name="humbugStreamForProject">
-      <f:textbox value="${descriptor.getStreamForProject()}" />
+    <f:entry title="Stream">
+      <f:textbox name="humbugStreamForProject" value="${instance.getStreamForProject()}" />
     </f:entry>
-    <f:entry title="Title" name="humbugTitleForProject">
-      <f:textbox value="${descriptor.getTitleForProject()}" />
+    <f:entry title="Title">
+      <f:textbox name="humbugTitleForProject" value="${instance.getTitleForProject()}" />
     </f:entry>
-    <f:entry title="Message" name="humbugMessageForProject">
-      <f:textarea value="${descriptor.getMessageForProject()}" />
+    <f:entry title="Message">
+      <f:textarea name="humbugMessageForProject" value="${instance.getMessageForProject()}" />
     </f:entry>
   </f:advanced>
 </j:jelly>
